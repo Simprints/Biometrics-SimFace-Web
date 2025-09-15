@@ -7,8 +7,8 @@ const nextConfig = {
   output: 'export',
   
   // Set the base path for GitHub Pages
-  basePath: isProd ? '/biometrics-simface-web' : '',
-  assetPrefix: isProd ? '/biometrics-simface-web/' : '',
+  basePath: isProd ? '' : '',
+  assetPrefix: isProd ? '/' : '',
 
   images: {
     // Required for static site generation with next/image
