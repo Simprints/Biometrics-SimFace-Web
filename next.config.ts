@@ -1,7 +1,19 @@
-import type { NextConfig } from "next";
+/** @type {import('next').NextConfig} */
 
-const nextConfig: NextConfig = {
-  /* config options here */
+const isProd = process.env.NODE_ENV === 'production';
+
+const nextConfig = {
+  // Required for static site generation with App Router
+  output: 'export',
+  
+  // Set the base path for GitHub Pages
+  basePath: isProd ? '/biometrics-simface-web/' : '',
+  assetPrefix: isProd ? '/biometrics-simface-web/' : '',
+
+  images: {
+    // Required for static site generation with next/image
+    unoptimized: true,
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
