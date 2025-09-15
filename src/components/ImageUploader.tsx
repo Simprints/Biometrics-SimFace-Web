@@ -1,11 +1,14 @@
+"use client";
+
 import { FaceSmileIcon } from '@heroicons/react/24/outline';
 import React, { useState, useRef } from 'react';
 
 type ImageUploaderProps = {
-  title: string;
+  // Callback function to pass the base64 image string to the parent
+  onImageUpload: (imageData: string | null) => void;
 };
 
-const ImageUploader = ({ title }: ImageUploaderProps) => {
+export default function ImageUploader({ onImageUpload }: ImageUploaderProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -13,8 +16,17 @@ const ImageUploader = ({ title }: ImageUploaderProps) => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      setImagePreview(previewUrl);
+      // Use FileReader to get a base64 string for the parent component
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setImagePreview(base64String);
+        onImageUpload(base64String); // Pass the data to the parent
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setImagePreview(null);
+      onImageUpload(null);
     }
   };
 
@@ -23,8 +35,7 @@ const ImageUploader = ({ title }: ImageUploaderProps) => {
   };
 
   return (
-    <div className="flex w-full flex-col items-center rounded-lg border-2 border-dashed border-gray-300 bg-white p-6 text-center shadow-sm md:w-2/5">
-      <h2 className="text-xl font-semibold text-gray-700">{title}</h2>
+     <div className="flex w-full flex-col items-center rounded-lg border-2 border-dashed border-gray-300 bg-white p-6 text-center shadow-sm md:w-2/5">
 
       <input
         type="file"
@@ -48,18 +59,10 @@ const ImageUploader = ({ title }: ImageUploaderProps) => {
 
       <button
         onClick={handleUploadClick}
-        className="mt-4 rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-300 cursor-pointer"
+        className="mt-4 rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 cursor-pointer"
       >
-        Upload Image
-      </button>
-
-      <p className="my-2 text-sm text-gray-500">or</p>
-
-      <button className="text-sm font-medium text-blue-600 hover:underline cursor-pointer">
-        Select from Bank
+        Choose a File
       </button>
     </div>
   );
 };
-
-export default ImageUploader;

@@ -1,53 +1,114 @@
-"use client"; // This is required for interactivity
+"use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ImageUploader from '@/components/ImageUploader';
 import ResultDisplay from '@/components/ResultDisplay';
-
-// Define a type for the result state
-type Result = {
-  score: number;
-  decision: 'Match' | 'No-Match' | 'Error';
-};
+import { loadModel, getEmbedding, cosineSimilarity } from '../lib/faceApi';
 
 export default function Home() {
-  const [comparisonResult, setComparisonResult] = useState<Result | null>(null);
+  // State for the two images to be compared
+  const [image1, setImage1] = useState<string | null>(null);
+  const [image2, setImage2] = useState<string | null>(null);
 
-  const handleCompare = () => {
-    // TODO: Implement the full comparison logic here
-    alert('Comparison logic goes here!');
+  // State to hold the similarity score
+  const [similarity, setSimilarity] = useState<number | null>(null);
+  
+  // State for loading and error messages
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isModelLoading, setIsModelLoading] = useState<boolean>(true);
 
-    // For demonstration, we'll set a dummy result
-    setComparisonResult({
-      score: 0.92,
-      decision: 'Match',
-    });
+  // Load the ONNX model when the component mounts
+  useEffect(() => {
+    async function initModel() {
+      try {
+        await loadModel();
+        setIsModelLoading(false);
+      } catch (err) {
+        setError('Failed to load the AI model. Please refresh the page.');
+        setIsModelLoading(false);
+      }
+    }
+    initModel();
+  }, []);
+
+  // Handler for the "Compare" button
+  const handleCompare = async () => {
+    if (!image1 || !image2) {
+      setError('Please upload both images before comparing.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    setSimilarity(null);
+
+    try {
+      // Create HTMLImageElement objects from the base64 strings
+      const img1Element = document.createElement('img');
+      img1Element.src = image1;
+      await new Promise((resolve) => { img1Element.onload = resolve; });
+      
+      const img2Element = document.createElement('img');
+      img2Element.src = image2;
+      await new Promise((resolve) => { img2Element.onload = resolve; });
+
+      // Get embeddings for both images
+      const embedding1 = await getEmbedding(img1Element);
+      const embedding2 = await getEmbedding(img2Element);
+
+      if (embedding1 && embedding2) {
+        // Calculate the cosine similarity
+        const sim = cosineSimilarity(embedding1, embedding2);
+        setSimilarity(sim);
+      } else {
+        setError('Could not generate embeddings for the images.');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('An error occurred during the comparison.');
+    } finally {
+      setIsLoading(false);
+    }
   };
+  
+  // Render a loading message while the model is being prepared
+  if (isModelLoading) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gray-50">
+        <h1 className="text-2xl font-semibold text-gray-800">Loading AI Model...</h1>
+        <p className="text-gray-600">This may take a moment.</p>
+      </main>
+    );
+  }
 
   return (
-    <main className="flex min-h-screen flex-col items-center bg-gray-50 p-8">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-800">SimFace Demo</h1>
-        <p className="mt-2 text-lg text-gray-600">
-          Upload two facial images to compare them.
+    <main className="flex min-h-screen flex-col items-center p-12 bg-gray-50">
+      <div className="w-full max-w-4xl text-center">
+        <h1 className="text-4xl font-bold text-gray-800 mb-4">SimFace Demo</h1>
+        <p className="text-lg text-gray-600 mb-8">
+          Upload two images to calculate how similar the faces are.
         </p>
-      </div>
 
-      <div className="mt-12 flex w-full max-w-4xl flex-col items-center gap-8 md:flex-row md:justify-around">
-        <ImageUploader title="Face 1" />
-        <ImageUploader title="Face 2" />
-      </div>
+        <div className="mt-12 flex w-full max-w-4xl flex-col items-center gap-8 md:flex-row md:justify-around">
+          <ImageUploader onImageUpload={setImage1} />
+          <ImageUploader onImageUpload={setImage2} />
+        </div>
 
-      <div className="mt-12">
-        <button
-          onClick={handleCompare}
-          className="rounded-lg bg-blue-600 px-12 py-4 text-xl font-semibold text-white shadow-md transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-        >
-          Compare Faces
-        </button>
-      </div>
-
-      {comparisonResult && <ResultDisplay result={comparisonResult} />}
+        <div className="mt-12" />
+          <button
+            onClick={handleCompare}
+            disabled={!image1 || !image2 || isLoading}
+            className="px-8 py-4 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-300"
+          >
+            {isLoading ? 'Comparing...' : 'Compare Faces'}
+          </button>
+        </div>
+        {/* Display Error Messages */}
+        {error && <p className="text-red-500 mt-4">{error}</p>}
+        
+        {/* Display the Result */}
+        {similarity !== null && <ResultDisplay similarity={similarity} />}
     </main>
   );
 }
