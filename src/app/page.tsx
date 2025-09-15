@@ -27,15 +27,15 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center bg-gray-50 p-8">
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-800">SimFace Biometric Demo</h1>
+        <h1 className="text-4xl font-bold text-gray-800">SimFace Demo</h1>
         <p className="mt-2 text-lg text-gray-600">
           Upload two facial images to compare them.
         </p>
       </div>
 
       <div className="mt-12 flex w-full max-w-4xl flex-col items-center gap-8 md:flex-row md:justify-around">
-        <ImageUploader title="Image One" />
-        <ImageUploader title="Image Two" />
+        <ImageUploader title="Face 1" />
+        <ImageUploader title="Face 2" />
       </div>
 
       <div className="mt-12">
