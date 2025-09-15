@@ -36,7 +36,7 @@ export async function getEmbedding(image: HTMLImageElement): Promise<tf.Tensor |
   }
 
   // 1. Pre-process the image with TensorFlow.js
-  let tensor = tf.browser.fromPixels(image)
+  const tensor = tf.browser.fromPixels(image)
     .resizeBilinear([MODEL_INPUT_SIZE, MODEL_INPUT_SIZE]) // Now uses 160x160
     .toFloat()
     .div(tf.scalar(255.0))
