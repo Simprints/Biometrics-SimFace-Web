@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@techstark/opencv-js": "^4.11.0-release.1",
+    "@tensorflow-models/face-landmarks-detection": "^1.0.6",
     "@tensorflow/tfjs": "^4.22.0",
     "next": "15.5.3",
     "onnxruntime-web": "^1.22.0",
@@ -22,6 +24,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/webpack": "^5.28.5",
     "eslint": "^9",
     "eslint-config-next": "15.5.3",
     "tailwindcss": "^4",

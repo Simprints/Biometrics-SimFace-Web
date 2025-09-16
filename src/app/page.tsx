@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import ImageUploader from '@/components/ImageUploader';
 import ResultDisplay from '@/components/ResultDisplay';
-import { loadModel, getEmbedding, cosineSimilarity } from '../lib/faceApi';
+import { loadModels, getEmbedding, cosineSimilarity } from '../lib/faceApi';
 
 export default function Home() {
   // State for the two images to be compared
@@ -22,7 +22,7 @@ export default function Home() {
   useEffect(() => {
     async function initModel() {
       try {
-        await loadModel();
+        await loadModels();
         setIsModelLoading(false);
       } catch (err) {
         setError('Failed to load the AI model. Please refresh the page.');
