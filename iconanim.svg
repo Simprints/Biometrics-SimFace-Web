@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+     width="400px" height="400px" viewBox="0 0 400 400" enable-background="new 0 0 400 400" xml:space="preserve">
+
+<defs>
+    <style type="text/css">
+        .swoosh {
+            stroke-dasharray: 400;
+            stroke-dashoffset: 400;
+            /* The animation now takes 4 seconds to complete a full draw-and-erase cycle */
+            animation: draw-and-erase 2s linear infinite;
+        }
+
+        /* MODIFIED KEYFRAMES FOR A SEAMLESS LOOP */
+        @keyframes draw-and-erase {
+            /* At the halfway point, the path is fully drawn */
+            50% {
+                stroke-dashoffset: 0;
+            }
+            /* At the end, the path is fully "erased" by continuing the offset */
+            100% {
+                stroke-dashoffset: -400;
+            }
+        }
+    </style>
+</defs>
+
+<g>
+    <path class="swoosh" stroke="#01B3D1" stroke-width="8" fill="none" d="M105.796,126.509c6.512-53.309,55.313-91.542,108.765-85.232c26.434,3.126,49.74,16.376,65.843,37.411
+        l28.49-20.84c-21.643-28.538-54.373-47.264-90.071-51.487C146.077-2.216,79.664,49.82,70.784,122.377
+        c-6.74,55.242,22.232,109.116,72.114,134.074l0.862,0.425l32.373-25.194C130.165,218.888,99.996,173.971,105.796,126.509"/>
+    <path class="swoosh" stroke="#01B3D1" stroke-width="8" fill="none" d="M294.691,274.35c-6.517,53.33-55.325,91.566-108.741,85.243c-26.476-3.116-49.779-16.363-65.874-37.402
+        l-28.485,20.835c21.648,28.537,54.371,47.271,90.09,51.483c72.737,8.59,139.142-43.457,148.016-116.026
+        c6.611-54.145-20.13-105.951-68.146-132.054l-0.768-0.424l-31.665,24.61C272.754,185.205,300.276,228.588,294.691,274.35"/>
+</g>
+</svg>
