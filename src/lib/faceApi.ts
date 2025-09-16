@@ -51,7 +51,13 @@ async function alignFace(imageSource: ImageSource): Promise<HTMLCanvasElement | 
     return null;
   }
 
-  const keypoints = predictions[0].keypoints;
+  const { keypoints, box } = predictions[0];
+  
+  const srcImageMat = cv.imread(imageSource);
+
+  // Crop the face from the source image
+  const rect = new cv.Rect(box.xMin, box.yMin, box.width, box.height);
+  const croppedImageMat = srcImageMat.roi(rect);
   
   const refPoints: Point[] = [
     new cv.Point(38.2946, 51.6963),
@@ -62,22 +68,22 @@ async function alignFace(imageSource: ImageSource): Promise<HTMLCanvasElement | 
   const scale = MODEL_INPUT_SIZE / 112.0;
   const scaledRefPoints = refPoints.map(p => new cv!.Point(p.x * scale, p.y * scale));
 
+  // Adjust keypoints to be relative to the cropped image
   const srcPoints: Point[] = [
-    new cv.Point(keypoints[33].x, keypoints[33].y),
-    new cv.Point(keypoints[263].x, keypoints[263].y),
-    new cv.Point(keypoints[1].x, keypoints[1].y),
+    new cv.Point(keypoints[33].x - box.xMin, keypoints[33].y - box.yMin),
+    new cv.Point(keypoints[263].x - box.xMin, keypoints[263].y - box.yMin),
+    new cv.Point(keypoints[1].x - box.xMin, keypoints[1].y - box.yMin),
   ];
 
   const srcMat = cv.matFromArray(3, 2, cv.CV_32F, srcPoints.flatMap(p => [p.x, p.y]));
   const refMat = cv.matFromArray(3, 2, cv.CV_32F, scaledRefPoints.flatMap(p => [p.x, p.y]));
 
   const transformMatrix: Mat = cv.getAffineTransform(srcMat, refMat);
-  const srcImageMat: Mat = cv.imread(imageSource);
   const warpedImageMat = new cv.Mat();
   const outputSize = new cv.Size(MODEL_INPUT_SIZE, MODEL_INPUT_SIZE);
 
   cv.warpAffine(
-    srcImageMat, warpedImageMat, transformMatrix, outputSize,
+    croppedImageMat, warpedImageMat, transformMatrix, outputSize,
     cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar()
   );
 
@@ -88,6 +94,7 @@ async function alignFace(imageSource: ImageSource): Promise<HTMLCanvasElement | 
 
   // Clean up OpenCV memory
   srcImageMat.delete();
+  croppedImageMat.delete();
   warpedImageMat.delete();
   transformMatrix.delete();
   srcMat.delete();
