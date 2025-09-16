@@ -1,5 +1,6 @@
 'use client';
 
+import LoadingComponent from '@/components/LoadingComponent';
 import dynamic from 'next/dynamic';
 
 // Define the props interface to match ClientPage
@@ -12,7 +13,7 @@ interface ClientPageProps {
 const DynamicClientPage = dynamic(() => import('./clientpage'), {
   ssr: false,
   // You can add a loading component here if you wish
-  // loading: () => <p>Loading...</p> 
+  loading: () => <LoadingComponent />, 
 });
 
 // This component simply passes the props through to the dynamically loaded one
