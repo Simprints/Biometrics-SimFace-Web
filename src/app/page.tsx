@@ -3,7 +3,14 @@
 import { useState, useEffect } from 'react';
 import ImageUploader from '@/components/ImageUploader';
 import ResultDisplay from '@/components/ResultDisplay';
-import { loadModels, getEmbedding, cosineSimilarity } from '../lib/faceApi';
+import type { getEmbedding, cosineSimilarity, loadModels } from '../lib/faceApi';
+
+// Define a type for the faceApi module
+type FaceApiModule = {
+    loadModels: typeof loadModels;
+    getEmbedding: typeof getEmbedding;
+    cosineSimilarity: typeof cosineSimilarity;
+};
 
 export default function Home() {
   // State for the two images to be compared
@@ -12,19 +19,26 @@ export default function Home() {
 
   // State to hold the similarity score
   const [similarity, setSimilarity] = useState<number | null>(null);
-  
+
   // State for loading and error messages
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isModelLoading, setIsModelLoading] = useState<boolean>(true);
 
+  // State to hold the dynamically imported module
+  const [faceApi, setFaceApi] = useState<FaceApiModule | null>(null);
+
+
   // Load the ONNX model when the component mounts
   useEffect(() => {
     async function initModel() {
       try {
-        await loadModels();
+        const faceApiModule = await import('../lib/faceApi');
+        setFaceApi(faceApiModule);
+        await faceApiModule.loadModels();
         setIsModelLoading(false);
       } catch (err) {
+        console.error(err);
         setError('Failed to load the AI model. Please refresh the page.');
         setIsModelLoading(false);
       }
@@ -34,7 +48,7 @@ export default function Home() {
 
   // Handler for the "Compare" button
   const handleCompare = async () => {
-    if (!image1 || !image2) {
+    if (!image1 || !image2 || !faceApi) {
       setError('Please upload both images before comparing.');
       return;
     }
@@ -48,18 +62,18 @@ export default function Home() {
       const img1Element = document.createElement('img');
       img1Element.src = image1;
       await new Promise((resolve) => { img1Element.onload = resolve; });
-      
+
       const img2Element = document.createElement('img');
       img2Element.src = image2;
       await new Promise((resolve) => { img2Element.onload = resolve; });
 
       // Get embeddings for both images
-      const embedding1 = await getEmbedding(img1Element);
-      const embedding2 = await getEmbedding(img2Element);
+      const embedding1 = await faceApi.getEmbedding(img1Element);
+      const embedding2 = await faceApi.getEmbedding(img2Element);
 
       if (embedding1 && embedding2) {
         // Calculate the cosine similarity
-        const sim = cosineSimilarity(embedding1, embedding2);
+        const sim = faceApi.cosineSimilarity(embedding1, embedding2);
         setSimilarity(sim);
       } else {
         setError('Could not generate embeddings for the images.');
@@ -71,7 +85,7 @@ export default function Home() {
       setIsLoading(false);
     }
   };
-  
+
   // Render a loading message while the model is being prepared
   if (isModelLoading) {
     return (
@@ -106,7 +120,7 @@ export default function Home() {
         </div>
         {/* Display Error Messages */}
         {error && <p className="text-red-500 mt-4">{error}</p>}
-        
+
         {/* Display the Result */}
         {similarity !== null && <ResultDisplay similarity={similarity} />}
     </main>
