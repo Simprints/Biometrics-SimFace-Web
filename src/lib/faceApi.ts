@@ -5,7 +5,8 @@ import cvReadyPromise, { CV, Mat, Point } from '@techstark/opencv-js';
 
 type ImageSource = HTMLImageElement | HTMLVideoElement | HTMLCanvasElement;
 
-const MODEL_PATH = './models/facenet.onnx';
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+const MODEL_PATH = `${basePath}/models/facenet.onnx`;
 const MODEL_INPUT_SIZE = 160;
 
 let onnxSession: InferenceSession | null = null;

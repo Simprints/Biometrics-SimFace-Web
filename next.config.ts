@@ -3,15 +3,15 @@ import type { Configuration as WebpackConfiguration } from 'webpack';
 
 const isProd = process.env.NODE_ENV === 'production';
 const repoName = 'Biometrics-SimFace-Web';
+const basePath = isProd ? `/${repoName}` : '';
+const assetPrefix = isProd ? `/${repoName}/` : '';
 
 const nextConfig = {
   // Required for static site generation with App Router
   output: 'export',
-  
-  
   // Set the base path for GitHub Pages
-  basePath: isProd ? `/${repoName}` : '',
-  assetPrefix: isProd ? `/${repoName}/` : '',
+  basePath: basePath,
+  assetPrefix: assetPrefix,
 
   images: {
     // Required for static site generation with next/image
@@ -39,6 +39,10 @@ const nextConfig = {
     }
 
     return config;
+  },
+  
+  env: {
+    NEXT_PUBLIC_BASE_PATH: basePath,
   },
 };
 
