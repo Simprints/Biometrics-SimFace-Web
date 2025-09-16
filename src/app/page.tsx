@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import ClientPage from './clientpage';
+import ClientPageWrapper from './dynamicclientpage'; 
 
 const getImages = (dir: string): string[] => {
   const directory = path.join(process.cwd(), 'public', 'images', dir);
@@ -16,5 +16,5 @@ export default function Page() {
   const galleryImages = getImages('gallery');
   const probeImages = getImages('probe');
 
-  return <ClientPage galleryImages={galleryImages} probeImages={probeImages} />;
+  return <ClientPageWrapper galleryImages={galleryImages} probeImages={probeImages} />;
 }
