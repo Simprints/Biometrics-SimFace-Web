@@ -6,8 +6,8 @@ import cvReadyPromise, { CV, Mat, Point } from '@techstark/opencv-js';
 type ImageSource = HTMLImageElement | HTMLVideoElement | HTMLCanvasElement;
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-const MODEL_PATH = `${basePath}/models/facenet.onnx`;
-const MODEL_INPUT_SIZE = 160;
+const MODEL_PATH = `${basePath}/models/edgeface_s_gamma_05.onnx`;
+const MODEL_INPUT_SIZE = 112;
 
 let onnxSession: InferenceSession | null = null;
 let landmarkDetector: faceLandmarksDetection.FaceLandmarksDetector | null = null;
@@ -116,7 +116,8 @@ export async function getEmbedding(image: ImageSource): Promise<tf.Tensor | null
     return tf.browser.fromPixels(alignedFaceCanvas)
       .toFloat()
       .div(tf.scalar(255.0))
-      .expandDims(0);
+      .expandDims(0)
+      .transpose([0, 3, 1, 2]);;
   });
 
   const onnxTensor = new Tensor('float32', tensor.dataSync(), tensor.shape);
