@@ -1,11 +1,13 @@
 'use client';
 import React from 'react';
+import { ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 
 interface ImageUploaderProps {
   onImageSelect: (imageDataUrl: string) => void;
+  id: string;
 }
 
-const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelect }) => {
+const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelect, id }) => {
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -20,13 +22,17 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelect }) => {
 
   return (
     <div>
+      <label htmlFor={id} className="cursor-pointer flex items-center space-x-2 px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition-colors">
+        <ArrowUpTrayIcon className="w-6 h-6" />
+        <span>Upload</span>
         <input
-            id="file-upload"
+            id={id}
             type="file"
             accept="image/*"
             onChange={handleImageChange}
-            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            className="hidden"
         />
+      </label>
     </div>
   );
 };
