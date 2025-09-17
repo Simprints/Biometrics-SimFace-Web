@@ -27,7 +27,10 @@ export default function ClientPage({
     title: string;
     images: string[];
     onSelect: (image: string) => void;
+    trueMatch: string | null;
   } | null>(null);
+  const [trueMatchA, setTrueMatchA] = useState<string | null>(null);
+  const [trueMatchB, setTrueMatchB] = useState<string | null>(null);
 
   const imageARef = useRef<HTMLImageElement>(null);
   const imageBRef = useRef<HTMLImageElement>(null);
@@ -61,14 +64,28 @@ export default function ClientPage({
     setModalConfig(null);
   };
 
+  const getTrueMatch = (selectedImage: string, images: string[]) => {
+    const selectedId = selectedImage.split("/").pop()?.substring(0, 6);
+    return (
+      images.find((img) =>
+        img
+          .split("/")
+          .pop()
+          ?.startsWith(selectedId ?? "")
+      ) || null
+    );
+  };
+
   const handleImageASelect = (image: string) => {
     setImageA(image);
+    setTrueMatchB(getTrueMatch(image, probeImages));
     setSimilarity(null);
     closeModal();
   };
 
   const handleImageBSelect = (image: string) => {
     setImageB(image);
+    setTrueMatchA(getTrueMatch(image, galleryImages));
     setSimilarity(null);
     closeModal();
   };
@@ -79,12 +96,14 @@ export default function ClientPage({
         title: "Gallery 1",
         images: galleryImages,
         onSelect: handleImageASelect,
+        trueMatch: trueMatchA,
       });
     } else {
       setModalConfig({
         title: "Gallery 2",
         images: probeImages,
         onSelect: handleImageBSelect,
+        trueMatch: trueMatchB,
       });
     }
     setIsModalOpen(true);
@@ -105,6 +124,7 @@ export default function ClientPage({
           <ImageSelector
             images={modalConfig.images}
             onSelect={modalConfig.onSelect}
+            trueMatch={modalConfig.trueMatch}
           />
         )}
       </Modal>
