@@ -19,6 +19,7 @@ interface FaceInputProps {
   hasGallery: boolean;
   uploaderId: string;
   error?: string | null;
+  onImageLoad: () => void;
 }
 
 const FaceInput: React.FC<FaceInputProps> = ({
@@ -30,6 +31,7 @@ const FaceInput: React.FC<FaceInputProps> = ({
   hasGallery,
   uploaderId,
   error,
+  onImageLoad,
 }) => {
   return (
     <div>
@@ -44,6 +46,7 @@ const FaceInput: React.FC<FaceInputProps> = ({
                 alt={`Face for comparison ${title}`}
                 className="rounded-lg aspect-square object-cover"
                 crossOrigin="anonymous"
+                onLoad={onImageLoad}
               />
             ) : (
               <FaceSmileIcon className="w-20 bg-gray-100 text-gray-300" />

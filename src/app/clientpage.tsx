@@ -110,16 +110,6 @@ export default function ClientPage({
     setImageA(image);
     setTrueMatchB(getTrueMatch(image, probeImages));
     setSimilarity(null);
-    setTimeout(
-      () =>
-        processAndStoreEmbedding(
-          imageARef,
-          setEmbeddingA,
-          setErrorA,
-          embeddingA
-        ),
-      100
-    );
     closeModal();
   };
 
@@ -127,16 +117,6 @@ export default function ClientPage({
     setImageB(image);
     setTrueMatchA(getTrueMatch(image, galleryImages));
     setSimilarity(null);
-    setTimeout(
-      () =>
-        processAndStoreEmbedding(
-          imageBRef,
-          setEmbeddingB,
-          setErrorB,
-          embeddingB
-        ),
-      100
-    );
     closeModal();
   };
 
@@ -196,6 +176,14 @@ export default function ClientPage({
           hasGallery={galleryImages.length > 0}
           uploaderId="file-upload-1"
           error={errorA}
+          onImageLoad={() =>
+            processAndStoreEmbedding(
+              imageARef,
+              setEmbeddingA,
+              setErrorA,
+              embeddingA
+            )
+          }
         />
 
         <div className="flex flex-col items-center justify-center">
@@ -211,6 +199,14 @@ export default function ClientPage({
           hasGallery={probeImages.length > 0}
           uploaderId="file-upload-2"
           error={errorB}
+          onImageLoad={() =>
+            processAndStoreEmbedding(
+              imageBRef,
+              setEmbeddingB,
+              setErrorB,
+              embeddingB
+            )
+          }
         />
       </div>
     </main>

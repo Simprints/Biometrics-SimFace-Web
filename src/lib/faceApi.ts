@@ -150,15 +150,11 @@ export async function getEmbedding(image: ImageSource): Promise<tf.Tensor> {
  * Calculates the cosine similarity between two embeddings.
  */
 export function cosineSimilarity(a: tf.Tensor, b: tf.Tensor): number {
-  const aNorm = a.norm();
-  const bNorm = b.norm();
-  const dotProduct = a.dot(b.transpose());
-
-  const similarity = dotProduct.div(aNorm.mul(bNorm)).dataSync()[0];
-
-  aNorm.dispose();
-  bNorm.dispose();
-  dotProduct.dispose();
-
-  return similarity;
+  return tf.tidy(() => {
+    const aNorm = a.norm();
+    const bNorm = b.norm();
+    const dotProduct = a.dot(b.transpose());
+    const similarity = dotProduct.div(aNorm.mul(bNorm));
+    return similarity.dataSync()[0];
+  });
 }
