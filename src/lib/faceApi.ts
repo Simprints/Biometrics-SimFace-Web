@@ -13,6 +13,13 @@ let onnxSession: InferenceSession | null = null;
 let landmarkDetector: faceLandmarksDetection.FaceLandmarksDetector | null = null;
 let cv: CV | null = null;
 
+export class FaceAlignmentError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'FaceAlignmentError';
+  }
+}
+
 export async function loadModels() {
 
   if (onnxSession && landmarkDetector && cv) {
@@ -106,17 +113,16 @@ async function alignFace(imageSource: ImageSource): Promise<HTMLCanvasElement | 
 /**
  * Takes a raw image, aligns the face, and computes an embedding.
  */
-export async function getEmbedding(image: ImageSource): Promise<tf.Tensor | null> {
+export async function getEmbedding(image: ImageSource): Promise<tf.Tensor> {
   if (!onnxSession || !landmarkDetector) {
     console.error('Models not loaded. Call loadModels() first.');
-    return null;
+    throw new Error('Models not loaded');
   }
 
   const alignedFaceCanvas = await alignFace(image);
 
   if (!alignedFaceCanvas) {
-    console.warn("Could not align face, skipping embedding.");
-    return null;
+    throw new FaceAlignmentError("Could not detect a face. Please try a different image.");
   }
 
   const tensor = tf.tidy(() => {

@@ -1,12 +1,18 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { getEmbedding, cosineSimilarity, loadModels } from "@/lib/faceApi";
+import {
+  getEmbedding,
+  cosineSimilarity,
+  loadModels,
+  FaceAlignmentError,
+} from "@/lib/faceApi";
 import ResultDisplay from "@/components/ResultDisplay";
 import ImageSelector from "@/components/ImageSelector";
 import Modal from "@/components/Modal";
 import LoadingComponent from "@/components/LoadingComponent";
 import FaceInput from "@/components/FaceInput";
+import * as tf from "@tensorflow/tfjs";
 
 interface ClientPageProps {
   galleryImages: string[];
@@ -19,9 +25,10 @@ export default function ClientPage({
 }: ClientPageProps) {
   const [imageA, setImageA] = useState<string | null>(null);
   const [imageB, setImageB] = useState<string | null>(null);
+  const [embeddingA, setEmbeddingA] = useState<tf.Tensor | null>(null);
+  const [embeddingB, setEmbeddingB] = useState<tf.Tensor | null>(null);
   const [similarity, setSimilarity] = useState<number | null>(null);
   const [loadingModels, setLoadingModels] = useState(true);
-  const [comparing, setComparing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalConfig, setModalConfig] = useState<{
     title: string;
@@ -31,6 +38,8 @@ export default function ClientPage({
   } | null>(null);
   const [trueMatchA, setTrueMatchA] = useState<string | null>(null);
   const [trueMatchB, setTrueMatchB] = useState<string | null>(null);
+  const [errorA, setErrorA] = useState<string | null>(null);
+  const [errorB, setErrorB] = useState<string | null>(null);
 
   const imageARef = useRef<HTMLImageElement>(null);
   const imageBRef = useRef<HTMLImageElement>(null);
@@ -43,21 +52,17 @@ export default function ClientPage({
     load();
   }, []);
 
-  const handleCompare = async () => {
-    if (imageARef.current && imageBRef.current) {
-      setComparing(true);
-      const embeddingA = await getEmbedding(imageARef.current);
-      const embeddingB = await getEmbedding(imageBRef.current);
-
+  // Automatically compare when both embeddings are available
+  useEffect(() => {
+    const compareEmbeddings = () => {
       if (embeddingA && embeddingB) {
         const sim = cosineSimilarity(embeddingA, embeddingB);
         setSimilarity(sim);
-        embeddingA.dispose();
-        embeddingB.dispose();
       }
-      setComparing(false);
-    }
-  };
+    };
+
+    compareEmbeddings();
+  }, [embeddingA, embeddingB]);
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -76,10 +81,45 @@ export default function ClientPage({
     );
   };
 
+  const processAndStoreEmbedding = async (
+    imageRef: React.RefObject<HTMLImageElement | null>,
+    setEmbedding: React.Dispatch<React.SetStateAction<tf.Tensor | null>>,
+    setError: React.Dispatch<React.SetStateAction<string | null>>,
+    currentEmbedding: tf.Tensor | null
+  ) => {
+    currentEmbedding?.dispose();
+    setEmbedding(null);
+    setError(null);
+
+    if (!imageRef.current) return;
+
+    try {
+      const newEmbedding = await getEmbedding(imageRef.current);
+      setEmbedding(newEmbedding);
+    } catch (error) {
+      if (error instanceof FaceAlignmentError) {
+        setError(error.message);
+      } else {
+        setError("An unknown error occurred during validation.");
+        console.error(error);
+      }
+    }
+  };
+
   const handleImageASelect = (image: string) => {
     setImageA(image);
     setTrueMatchB(getTrueMatch(image, probeImages));
     setSimilarity(null);
+    setTimeout(
+      () =>
+        processAndStoreEmbedding(
+          imageARef,
+          setEmbeddingA,
+          setErrorA,
+          embeddingA
+        ),
+      100
+    );
     closeModal();
   };
 
@@ -87,6 +127,16 @@ export default function ClientPage({
     setImageB(image);
     setTrueMatchA(getTrueMatch(image, galleryImages));
     setSimilarity(null);
+    setTimeout(
+      () =>
+        processAndStoreEmbedding(
+          imageBRef,
+          setEmbeddingB,
+          setErrorB,
+          embeddingB
+        ),
+      100
+    );
     closeModal();
   };
 
@@ -145,17 +195,11 @@ export default function ClientPage({
           onGalleryClick={() => openModal("gallery")}
           hasGallery={galleryImages.length > 0}
           uploaderId="file-upload-1"
+          error={errorA}
         />
 
         <div className="flex flex-col items-center justify-center">
           <ResultDisplay similarity={similarity} />
-          <button
-            onClick={handleCompare}
-            disabled={!imageA || !imageB || comparing}
-            className="mt-8 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 disabled:bg-gray-400 cursor-pointer transition-colors"
-          >
-            {comparing ? "Comparing.." : "Compare"}
-          </button>
         </div>
 
         <FaceInput
@@ -166,6 +210,7 @@ export default function ClientPage({
           onGalleryClick={() => openModal("probe")}
           hasGallery={probeImages.length > 0}
           uploaderId="file-upload-2"
+          error={errorB}
         />
       </div>
     </main>

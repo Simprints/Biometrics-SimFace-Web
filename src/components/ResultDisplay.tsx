@@ -16,9 +16,7 @@ export default function ResultDisplay({ similarity }: ResultDisplayProps) {
           Waiting
         </p>
         <div className="mt-4">
-          <p className="text-sm text-gray-500">
-            Select two images to see the similarity score.
-          </p>
+          <p className="text-sm text-gray-500">Select two images</p>
         </div>
       </div>
     );
