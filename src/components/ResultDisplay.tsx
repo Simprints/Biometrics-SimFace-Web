@@ -1,7 +1,7 @@
-import React from 'react';
+import React from "react";
 
 // A common threshold for face similarity. You can adjust this value.
-const SIMILARITY_THRESHOLD = 0.6;
+const SIMILARITY_THRESHOLD = 0.5;
 
 type ResultDisplayProps = {
   similarity: number | null;
@@ -25,15 +25,15 @@ export default function ResultDisplay({ similarity }: ResultDisplayProps) {
   }
 
   // If a comparison result exists, render the result.
-  const decision = similarity >= SIMILARITY_THRESHOLD ? 'Match' : 'No Match';
-  const isMatch = decision === 'Match';
+  const decision = similarity >= SIMILARITY_THRESHOLD ? "Match" : "No Match";
+  const isMatch = decision === "Match";
   const score = similarity;
 
   return (
     <div className="w-full max-w-sm rounded-lg bg-white p-6 text-center shadow-lg animate-fade-in">
       <p
         className={`rounded-lg px-6 py-2 text-xl font-bold transition-colors duration-300 ${
-          isMatch ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          isMatch ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
         }`}
       >
         {decision}
