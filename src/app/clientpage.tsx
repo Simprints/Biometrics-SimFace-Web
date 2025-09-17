@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   getEmbedding,
   cosineSimilarity,
@@ -41,9 +41,6 @@ export default function ClientPage({
   const [errorA, setErrorA] = useState<string | null>(null);
   const [errorB, setErrorB] = useState<string | null>(null);
 
-  const imageARef = useRef<HTMLImageElement>(null);
-  const imageBRef = useRef<HTMLImageElement>(null);
-
   useEffect(() => {
     async function load() {
       await loadModels();
@@ -82,7 +79,7 @@ export default function ClientPage({
   };
 
   const processAndStoreEmbedding = async (
-    imageRef: React.RefObject<HTMLImageElement | null>,
+    imageElement: HTMLImageElement,
     setEmbedding: React.Dispatch<React.SetStateAction<tf.Tensor | null>>,
     setError: React.Dispatch<React.SetStateAction<string | null>>,
     currentEmbedding: tf.Tensor | null
@@ -91,10 +88,8 @@ export default function ClientPage({
     setEmbedding(null);
     setError(null);
 
-    if (!imageRef.current) return;
-
     try {
-      const newEmbedding = await getEmbedding(imageRef.current);
+      const newEmbedding = await getEmbedding(imageElement);
       setEmbedding(newEmbedding);
     } catch (error) {
       if (error instanceof FaceAlignmentError) {
@@ -111,6 +106,15 @@ export default function ClientPage({
     setTrueMatchB(getTrueMatch(image, probeImages));
     setSimilarity(null);
     closeModal();
+
+    const img = new Image();
+    img.src = image;
+    img.onload = () => {
+      processAndStoreEmbedding(img, setEmbeddingA, setErrorA, embeddingA);
+    };
+    img.onerror = () => {
+      setErrorA("Failed to load image for processing.");
+    };
   };
 
   const handleImageBSelect = (image: string) => {
@@ -118,6 +122,15 @@ export default function ClientPage({
     setTrueMatchA(getTrueMatch(image, galleryImages));
     setSimilarity(null);
     closeModal();
+
+    const img = new Image();
+    img.src = image;
+    img.onload = () => {
+      processAndStoreEmbedding(img, setEmbeddingB, setErrorB, embeddingB);
+    };
+    img.onerror = () => {
+      setErrorB("Failed to load image for processing.");
+    };
   };
 
   const openModal = (type: "gallery" | "probe") => {
@@ -170,20 +183,11 @@ export default function ClientPage({
         <FaceInput
           title="1."
           imageSrc={imageA}
-          imageRef={imageARef}
           onImageSelect={handleImageASelect}
           onGalleryClick={() => openModal("gallery")}
           hasGallery={galleryImages.length > 0}
           uploaderId="file-upload-1"
           error={errorA}
-          onImageLoad={() =>
-            processAndStoreEmbedding(
-              imageARef,
-              setEmbeddingA,
-              setErrorA,
-              embeddingA
-            )
-          }
         />
 
         <div className="flex flex-col items-center justify-center">
@@ -193,20 +197,11 @@ export default function ClientPage({
         <FaceInput
           title="2."
           imageSrc={imageB}
-          imageRef={imageBRef}
           onImageSelect={handleImageBSelect}
           onGalleryClick={() => openModal("probe")}
           hasGallery={probeImages.length > 0}
           uploaderId="file-upload-2"
           error={errorB}
-          onImageLoad={() =>
-            processAndStoreEmbedding(
-              imageBRef,
-              setEmbeddingB,
-              setErrorB,
-              embeddingB
-            )
-          }
         />
       </div>
     </main>

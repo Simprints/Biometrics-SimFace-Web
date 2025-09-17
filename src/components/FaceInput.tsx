@@ -13,25 +13,21 @@ import IconButton from "@/components/IconButton";
 interface FaceInputProps {
   title: string;
   imageSrc: string | null;
-  imageRef: React.RefObject<HTMLImageElement | null>;
   onImageSelect: (image: string) => void;
   onGalleryClick: () => void;
   hasGallery: boolean;
   uploaderId: string;
   error?: string | null;
-  onImageLoad: () => void;
 }
 
 const FaceInput: React.FC<FaceInputProps> = ({
   title,
   imageSrc,
-  imageRef,
   onImageSelect,
   onGalleryClick,
   hasGallery,
   uploaderId,
   error,
-  onImageLoad,
 }) => {
   return (
     <div>
@@ -41,12 +37,10 @@ const FaceInput: React.FC<FaceInputProps> = ({
           <div className="aspect-square bg-gray-100 flex items-center justify-center rounded-lg mb-6 relative">
             {imageSrc ? (
               <img
-                ref={imageRef}
                 src={imageSrc}
                 alt={`Face for comparison ${title}`}
                 className="rounded-lg aspect-square object-cover"
                 crossOrigin="anonymous"
-                onLoad={onImageLoad}
               />
             ) : (
               <FaceSmileIcon className="w-20 bg-gray-100 text-gray-300" />
