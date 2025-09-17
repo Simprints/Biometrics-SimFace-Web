@@ -1,6 +1,6 @@
-'use client';
-import React from 'react';
-import { ArrowUpTrayIcon } from '@heroicons/react/24/outline';
+"use client";
+import React from "react";
+import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 
 interface ImageUploaderProps {
   onImageSelect: (imageDataUrl: string) => void;
@@ -22,15 +22,18 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelect, id }) => {
 
   return (
     <div>
-      <label htmlFor={id} className="cursor-pointer flex items-center space-x-2 px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition-colors">
+      <label
+        htmlFor={id}
+        className="cursor-pointer flex items-center space-x-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+      >
         <ArrowUpTrayIcon className="w-6 h-6" />
-        <span>Upload</span>
+        <span className="font-semibold text-sm">Upload</span>
         <input
-            id={id}
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="hidden"
+          id={id}
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          className="hidden"
         />
       </label>
     </div>

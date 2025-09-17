@@ -10,10 +10,10 @@ const IconButton: React.FC<IconButtonProps> = ({ onClick, icon, text }) => {
   return (
     <button
       onClick={onClick}
-      className="flex items-center space-x-2 px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 cursor-pointer transition-colors w-full"
+      className="flex items-center space-x-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 cursor-pointer transition-colors w-full"
     >
       {icon}
-      <span>{text}</span>
+      <span className="font-semibold text-sm">{text}</span>
     </button>
   );
 };
