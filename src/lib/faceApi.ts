@@ -39,6 +39,15 @@ export async function loadModels() {
       )
     ]);
     console.log('All models loaded successfully.');
+
+    if (onnxSession) {
+      console.log('Performing a warm-up inference...');
+      const dummyInput = new Tensor('float32', new Float32Array(1 * 3 * MODEL_INPUT_SIZE * MODEL_INPUT_SIZE), [1, 3, MODEL_INPUT_SIZE, MODEL_INPUT_SIZE]);
+      const feeds = { [onnxSession.inputNames[0]]: dummyInput };
+      await onnxSession.run(feeds);
+      console.log('Warm-up inference complete.');
+    }
+
   } catch (error) {
     console.error('Failed to load models:', error);
   }
@@ -51,6 +60,10 @@ async function alignFace(imageSource: ImageSource): Promise<HTMLCanvasElement | 
   if (!landmarkDetector || !cv || !onnxSession) {
     throw new Error("Models not loaded.");
   }
+
+  // perform a few warm-up estimations
+  await landmarkDetector.estimateFaces(imageSource);
+  await landmarkDetector.estimateFaces(imageSource);
 
   const predictions = await landmarkDetector.estimateFaces(imageSource);
 
@@ -135,8 +148,9 @@ export async function getEmbedding(image: ImageSource): Promise<tf.Tensor> {
 
   const onnxTensor = new Tensor('float32', tensor.dataSync(), tensor.shape);
   const feeds = { [onnxSession.inputNames[0]]: onnxTensor };
-  
+
   const results = await onnxSession.run(feeds);
+
   const outputTensor = results[onnxSession.outputNames[0]];
 
   const embedding = tf.tensor(outputTensor.data as Float32Array, [...outputTensor.dims]);
