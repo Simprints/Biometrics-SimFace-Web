@@ -1,9 +1,9 @@
-import type { Metadata } from 'next';
-import './globals.css';
+import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: 'SimFace Biometric Demo',
-  description: 'Demonstration of the SimFace algorithm',
+  title: "SimFace Demo",
+  description: "Demonstration of the SimFace algorithm",
 };
 
 export default function RootLayout({
