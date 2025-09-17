@@ -1,6 +1,6 @@
 # Biometrics SimFace Web
 
-This project provides a web UI for [SimFace](https://simprints.github.io/Biometrics-SimFace). It was developed as a Lego Days project in H2 2025.
+This project provides a web UI for [SimFace](https://github.com/Simprints/Biometrics-SimFace). It was developed as a Lego Days project in H2 2025.
 
 ---
 
